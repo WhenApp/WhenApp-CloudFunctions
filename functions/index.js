@@ -8,7 +8,7 @@ const rootRef = admin.database().ref();
  * Cleans the database, removing any tasks that don't meet the requirements of a task.
  */
 exports.cleanDatabase = functions.pubsub.topic('clean-database').onPublish((event) => {
-  rootRef.child('events/').on('child_added', (e) => {
+  return rootRef.child('events/').on('child_added', (e) => {
     e.ref.on('child_added', (t) => {
       let task = t.val();
       if(!task.name.length) {
@@ -22,6 +22,10 @@ exports.cleanDatabase = functions.pubsub.topic('clean-database').onPublish((even
  * Checks each incoming task to make sure that it meets any requirements before letting it be saved.
  */
 exports.checkTask = functions.database.ref('/events/{uid}/{taskID}').onWrite((event) => {
+  if(!event.data.exists()) {
+    return;
+  }
+  
   let task = event.data.val();
   
   if(!task.name.length) {
