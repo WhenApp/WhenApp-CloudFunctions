@@ -9,10 +9,10 @@ const rootRef = admin.database().ref();
  */
 exports.cleanDatabase = functions.pubsub.topic('clean-database').onPublish((event) => {
   return rootRef.child('events/').on('child_added', (e) => {
-    e.ref.on('child_added', (t) => {
+    return e.ref.on('child_added', (t) => {
       let task = t.val();
       if(!task.name.length) {
-        t.ref.remove();
+        return t.ref.remove();
       }
     });
   });
@@ -25,7 +25,7 @@ exports.checkTask = functions.database.ref('/events/{uid}/{taskID}').onWrite((ev
   if(!event.data.exists()) {
     return;
   }
-  
+
   let task = event.data.val();
   
   if(!task.name.length) {
